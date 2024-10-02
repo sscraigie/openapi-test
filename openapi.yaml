@@ -1,0 +1,143 @@
+openapi: 3.0.0
+info:
+  title: Cost of Living Index
+  version: 1.0.16
+servers: []
+paths:
+  /status:
+    get:
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/status-response'
+      description: Get the health of the service. Be sure to check the `healthy` attribute of the response, not just the status code. Caching not recommended.
+      operationId: GET_status
+  /meta:
+    get:
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/meta-response'
+      description: Get service metadata, including taxonomies and attribution text. Caching is encouraged, but the metadata may change quarterly.
+      operationId: GET_meta
+  /data:
+    get:
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/data-response'
+      description: Get the cost of living index for all available counties. Given the small size of the dataset, you may find caching the entire dataset rather than querying as-needed to be optimal.
+      operationId: GET_data
+    post:
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/data-response'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error-response'
+      description: Get cost of living index for requested set of counties. Counties that are invalid or don't exist in the data will be returned with the value `null`.
+      operationId: POST_data
+      requestBody:
+        content:
+          application/json:
+            example: Can not resolve examples/requests/data.json
+            schema:
+              $ref: '#/components/schemas/data-request'
+        required: true
+components:
+  schemas:
+    data-request:
+      type: array
+      items:
+        type: string
+        example:        
+          "16057": 1.002  
+          "51510": 1.405
+    error-response:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 400
+              title:
+                type: string
+                example: "Malformed Request"
+              detail:
+                type: string
+                example: "Expected array"
+    data-response:
+      type: object
+      properties:
+        data: 
+          type: object
+          additionalProperties:
+            type: number
+          example:        
+            "16057": 1.002  
+            "51510": 1.405
+    status-response:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            messages:
+              type: string
+              example: "Service is healthy"
+            healthy:
+              type: boolean
+              example: true
+    meta-response:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            taxonomies:
+              type: object
+              properties:
+                area: 
+                  type: string
+                  example: "us_area_2018_3"
+            attribution:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Cost of Living Data"
+                body: 
+                  type: string
+                  example: "Lightcast cost of living data is based on the Cost of Living Index published quarterly by the Council for Community and Economic Research (C2ER)."
+  responses: {}
+  parameters: {}
+  examples: {}
+  requestBodies: {}
+  headers: {}
+  securitySchemes:
+    oauth_2_0:
+      description: OAuth 2.0 for authenticating all API requests.
+      type: oauth2
+      flows: {}
+  links: {}
+  callbacks: {}
